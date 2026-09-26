@@ -8,6 +8,15 @@ class Board;
 struct PiecePosition {
     char x;
     int y;
+
+    bool isValid() const {
+        return (x - 'a' >= 0 && x - 'a' <= 7) && ( y - 1 >= 0 && y - 1 <= 7);
+    }
+
+    std::pair<int, int> toArrayIndices() const {
+        return {x - 'a', y - 1};
+    }
+
 };
 
 enum class Color {
