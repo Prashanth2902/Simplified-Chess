@@ -45,4 +45,12 @@ public:
     virtual std::vector<PiecePosition> getValidMoves(const Board& board) const = 0;
 
     virtual ~Piece() {}
+
+protected:
+    // Shared sliding-move logic for Rook/Bishop/Queen: walks outward from the
+    // current position along each (dx, dy) direction until the edge of the
+    // board, an own-color piece, or a capturable opponent piece is reached.
+    std::vector<PiecePosition> slidingMoves(
+        const Board& board,
+        const std::vector<std::pair<int, int>>& directions) const;
 };
