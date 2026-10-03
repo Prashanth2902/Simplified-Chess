@@ -1,58 +1,43 @@
 #include <iostream>
-#include <memory>
 
-#include "Board.h"
-#include "Piece.h"
-#include "Pieces/Bishop.h"
-#include "Pieces/King.h"
-#include "Pieces/Knight.h"
-#include "Pieces/Pawn.h"
-#include "Pieces/Queen.h"
-#include "Pieces/Rook.h"
+#include "Game.h"
 
 namespace {
-void printMoves(const char* label, const std::vector<PiecePosition>& moves) {
-    std::cout << label << " (" << moves.size() << " moves): ";
-    for (const PiecePosition& pos : moves) {
-        std::cout << pos.x << pos.y << " ";
-    }
-    std::cout << std::endl;
+const char* colorName(Color color) {
+    return color == Color::White ? "White" : "Black";
 }
 }
 
 int main() {
-    Board board;
+    Game game;
 
-    // Empty-board sanity checks: known move counts from d4.
-    PiecePosition d4{'d', 4};
-    board.placePiece(d4, std::make_unique<Rook>(Color::White, d4));
-    printMoves("Rook on empty board from d4", board.getPieceAt(d4)->getValidMoves(board));
+    std::cout << "Turn: " << colorName(game.getCurrentTurn()) << std::endl;
 
-    board.placePiece(d4, std::make_unique<Bishop>(Color::White, d4));
-    printMoves("Bishop on empty board from d4", board.getPieceAt(d4)->getValidMoves(board));
+    // Legal: white pawn e2 -> e3.
+    bool moved = game.tryMove(PiecePosition{'e', 2}, PiecePosition{'e', 3});
+    std::cout << "e2->e3: " << (moved ? "ok" : "rejected") << std::endl;
+    std::cout << "Turn: " << colorName(game.getCurrentTurn()) << std::endl;
 
-    board.placePiece(d4, std::make_unique<Queen>(Color::White, d4));
-    printMoves("Queen on empty board from d4", board.getPieceAt(d4)->getValidMoves(board));
+    // Illegal: moving out of turn (white piece again, but it's black's turn).
+    moved = game.tryMove(PiecePosition{'e', 3}, PiecePosition{'e', 4});
+    std::cout << "e3->e4 (wrong turn): " << (moved ? "ok" : "rejected") << std::endl;
 
-    board.placePiece(d4, std::make_unique<Knight>(Color::White, d4));
-    printMoves("Knight on empty board from d4", board.getPieceAt(d4)->getValidMoves(board));
+    // Double-step is deferred for now, so two squares forward is correctly rejected.
+    moved = game.tryMove(PiecePosition{'e', 7}, PiecePosition{'e', 5});
+    std::cout << "e7->e5 (double-step, not yet supported): " << (moved ? "ok" : "rejected") << std::endl;
 
-    board.placePiece(d4, std::make_unique<King>(Color::White, d4));
-    printMoves("King on empty board from d4", board.getPieceAt(d4)->getValidMoves(board));
+    // Legal: black pawn e7 -> e6 (single step).
+    moved = game.tryMove(PiecePosition{'e', 7}, PiecePosition{'e', 6});
+    std::cout << "e7->e6: " << (moved ? "ok" : "rejected") << std::endl;
+    std::cout << "Turn: " << colorName(game.getCurrentTurn()) << std::endl;
 
-    // Pawn: forward move only, nothing to capture yet.
-    PiecePosition e2{'e', 2};
-    board.placePiece(e2, std::make_unique<Pawn>(Color::White, e2));
-    printMoves("Pawn on empty board from e2", board.getPieceAt(e2)->getValidMoves(board));
+    // Illegal: not a valid knight move.
+    moved = game.tryMove(PiecePosition{'b', 1}, PiecePosition{'b', 3});
+    std::cout << "b1->b3 (invalid knight move): " << (moved ? "ok" : "rejected") << std::endl;
 
-    // Blocking + capture check: white rook on d4, white pawn on d6 (blocks),
-    // black pawn on d7 (beyond the block, should not be reachable).
-    board.placePiece(d4, std::make_unique<Rook>(Color::White, d4));
-    board.placePiece(PiecePosition{'d', 6}, std::make_unique<Pawn>(Color::White, PiecePosition{'d', 6}));
-    printMoves("Rook on d4 blocked by own pawn on d6", board.getPieceAt(d4)->getValidMoves(board));
-
-    board.placePiece(PiecePosition{'d', 6}, std::make_unique<Pawn>(Color::Black, PiecePosition{'d', 6}));
-    printMoves("Rook on d4 with capturable black pawn on d6", board.getPieceAt(d4)->getValidMoves(board));
+    // Legal: knight b1 -> c3.
+    moved = game.tryMove(PiecePosition{'b', 1}, PiecePosition{'c', 3});
+    std::cout << "b1->c3: " << (moved ? "ok" : "rejected") << std::endl;
 
     return 0;
 }
