@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(SimplifiedChess
     src/main.cpp
     src/Board.cpp
+    src/Game.cpp
     src/Piece.cpp
     src/Pieces/Pawn.cpp
     src/Pieces/Knight.cpp

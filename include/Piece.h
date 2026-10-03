@@ -17,6 +17,9 @@ struct PiecePosition {
         return {x - 'a', y - 1};
     }
 
+    bool operator==(const PiecePosition& other) const {
+        return x == other.x && y == other.y;
+    }
 };
 
 enum class Color {
